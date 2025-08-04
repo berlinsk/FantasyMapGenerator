@@ -57,10 +57,32 @@ struct RiverGenerator {
                 let elevation = noiseMap.value(at: vector_int2(Int32(i), Int32(j)))
                 if elevation < -0.05 {
                     exitedToWater = true
+                    points.append(p)
                     break
                 } else if elevation < 0 {
-                    break
+                    var foundWater = false
+                    var searchP = p
+                    for _ in 0..<10 {
+                        let i2 = min(max(Int(searchP.x), 0), width - 1)
+                        let j2 = min(max(Int(searchP.y), 0), height - 1)
+                        let elev = noiseMap.value(at: vector_int2(Int32(i2), Int32(j2)))
+                        if elev < -0.05 {
+                            exitedToWater = true
+                            p = searchP
+                            points.append(p)
+                            foundWater = true
+                            break
+                        }
+                        searchP.x += CGFloat(steepestDir.dx)
+                        searchP.y += CGFloat(steepestDir.dy)
+                    }
+                    if foundWater {
+                        break
+                    } else {
+                        break
+                    }
                 }
+
 
                 points.append(p)
             }
@@ -76,9 +98,23 @@ struct RiverGenerator {
                     riverPath.addQuadCurve(to: mid, control: points[i])
                 }
 
-                context.setLineWidth(exitedToWater ? 6 : 2)
-                context.addPath(riverPath)
-                context.strokePath()
+                if exitedToWater {
+                    for i in 0..<points.count - 1 {
+                        let p1 = points[i]
+                        let p2 = points[i + 1]
+                        let t = CGFloat(i) / CGFloat(points.count - 1)
+                        let width = 2 + 6 * t
+                        context.setLineWidth(width)
+                        context.beginPath()
+                        context.move(to: p1)
+                        context.addLine(to: p2)
+                        context.strokePath()
+                    }
+                } else {
+                    context.setLineWidth(2)
+                    context.addPath(riverPath)
+                    context.strokePath()
+                }
             }
         }
     }
