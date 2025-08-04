@@ -29,7 +29,9 @@ struct RiverGenerator {
             var points: [CGPoint] = [p]
             var exitedToWater = false
 
-            for _ in 0 ..< 300 {
+            let maxLength = Int.random(in: 200...750)
+
+            for _ in 0..<maxLength {
                 let i = min(max(Int(p.x), 0), width - 1)
                 let j = min(max(Int(p.y), 0), height - 1)
                 let h = noiseMap.value(at: vector_int2(Int32(i), Int32(j)))
@@ -57,7 +59,19 @@ struct RiverGenerator {
                 let elevation = noiseMap.value(at: vector_int2(Int32(i), Int32(j)))
                 if elevation < -0.05 {
                     exitedToWater = true
-                    points.append(p)
+
+                    for k in 0..<6 {
+                        let px = Int(p.x) + Int(CGFloat(steepestDir.dx) * CGFloat(k))
+                        let py = Int(p.y) + Int(CGFloat(steepestDir.dy) * CGFloat(k))
+                        if px >= 0 && px < width && py >= 0 && py < height {
+                            let val = noiseMap.value(at: vector_int2(Int32(px), Int32(py)))
+                            if val < -0.05 {
+                                points.append(CGPoint(x: px, y: py))
+                                break
+                            }
+                        }
+                    }
+
                     break
                 } else if elevation < 0 {
                     var foundWater = false
@@ -104,7 +118,6 @@ struct RiverGenerator {
                     let j = min(max(Int(lastPoint.y), 0), height - 1)
                     let finalElevation = Double(noiseMap.value(at: vector_int2(Int32(i), Int32(j))))
                     let waterColor = TerrainType.from(value: finalElevation).color
-
                     let baseColor = UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1)
 
                     for i in 0..<points.count - 1 {
@@ -115,8 +128,8 @@ struct RiverGenerator {
                         let blendedColor = ColorUtils.interpolate(from: baseColor, to: waterColor, t: t)
                         context.setStrokeColor(blendedColor.cgColor)
 
-                        let width = 2 + 6 * t
-                        context.setLineWidth(width)
+                        let thickness = 1.5 + 4.5 * t
+                        context.setLineWidth(thickness)
                         context.beginPath()
                         context.move(to: p1)
                         context.addLine(to: p2)
