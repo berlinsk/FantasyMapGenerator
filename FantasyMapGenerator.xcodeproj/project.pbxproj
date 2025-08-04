@@ -14,6 +14,7 @@
 		C4B685EA2E40CDA000E32207 /* Exceptions for "FantasyMapGenerator" folder in "FantasyMapGenerator" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Assets.xcassets,
 				Info.plist,
 			);
 			target = C4B685D72E40CD9800E32207 /* FantasyMapGenerator */;

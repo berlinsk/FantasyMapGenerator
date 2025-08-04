@@ -8,7 +8,7 @@
 import UIKit
 import GameplayKit
 
-final class MapGenerator {
+struct MapGenerator {
     static func generate(size: CGSize) -> UIImage {
         let width = Int(size.width)
         let height = Int(size.height)
@@ -19,19 +19,18 @@ final class MapGenerator {
 
             for y in 0..<height {
                 for x in 0..<width {
-                    let value = noiseMap.value(at: vector_int2(Int32(x), Int32(y)))
-                    let m = noiseMap.value(at: vector_int2(Int32((x + 123) % width), Int32((y + 456) % height)))
-                    let type = TerrainType.from(value: Double(value), modifier: Double(m))
+                    let v = noiseMap.value(at: vector_int2(Int32(x), Int32(y)))
+                    let type = TerrainType.from(value: Double(v))
                     context.setFillColor(type.color.cgColor)
                     context.fill(CGRect(x: x, y: y, width: 1, height: 1))
                 }
             }
 
-            RiverGenerator.drawRivers(in: context, with: noiseMap, width: width, height: height)
+            RiverGenerator.drawRivers(in: ctx.cgContext, with: noiseMap, width: width, height: height)
 
-            let cities = CityGenerator.placeCities(in: context, noiseMap: noiseMap, width: width, height: height)
+            let cities = CityGenerator.placeCities(in: ctx.cgContext, noiseMap: noiseMap, width: width, height: height)
 
-            RoadGenerator.drawRoads(ctx: context, cities: cities)
+            RoadGenerator.drawRoads(ctx: context, cities: cities, noiseMap: noiseMap, size: CGSize(width: width, height: height))
         }
     }
 }
