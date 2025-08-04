@@ -99,10 +99,22 @@ struct RiverGenerator {
                 }
 
                 if exitedToWater {
+                    let lastPoint = points.last!
+                    let i = min(max(Int(lastPoint.x), 0), width - 1)
+                    let j = min(max(Int(lastPoint.y), 0), height - 1)
+                    let finalElevation = Double(noiseMap.value(at: vector_int2(Int32(i), Int32(j))))
+                    let waterColor = TerrainType.from(value: finalElevation).color
+
+                    let baseColor = UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1)
+
                     for i in 0..<points.count - 1 {
                         let p1 = points[i]
                         let p2 = points[i + 1]
                         let t = CGFloat(i) / CGFloat(points.count - 1)
+
+                        let blendedColor = ColorUtils.interpolate(from: baseColor, to: waterColor, t: t)
+                        context.setStrokeColor(blendedColor.cgColor)
+
                         let width = 2 + 6 * t
                         context.setLineWidth(width)
                         context.beginPath()
