@@ -30,7 +30,9 @@ struct MapGenerator {
 
             let cities = CityGenerator.placeCities(in: ctx.cgContext, noiseMap: noiseMap, width: width, height: height)
 
-            RoadGenerator.drawRoads(ctx: context, cities: cities, noiseMap: noiseMap, size: CGSize(width: width, height: height))
+            let scale = 4
+            let costMap = TerrainCostMap(noiseMap: noiseMap, width: width, height: height, scale: scale)
+            RoadGenerator.drawRoads(ctx: context, cities: cities, costMap: costMap, size: CGSize(width: width / scale, height: height / scale), scale: scale)
         }
     }
 }

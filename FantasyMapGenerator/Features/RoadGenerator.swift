@@ -10,37 +10,33 @@ import CoreGraphics
 import GameplayKit
 
 struct RoadGenerator {
-    static func drawRoads(ctx: CGContext, cities: [CGPoint], noiseMap: GKNoiseMap, size: CGSize) {
+    static func drawRoads(ctx: CGContext, cities: [CGPoint], costMap: TerrainCostMap, size: CGSize, scale: Int) {
         ctx.setStrokeColor(UIColor.brown.cgColor)
         ctx.setLineWidth(1)
         for i in 0..<cities.count {
-            for j in i+1..<cities.count where Int.random(in: 0...100) < 30 {
-                let path = curvedPathAvoidingWater(from: cities[i], to: cities[j], noiseMap: noiseMap, size: size)
+            for j in i+1..<cities.count where Int.random(in: 0...100) < 10 {
+                let points = PathFinder.findPath(from: cities[i], to: cities[j], costMap: costMap, size: size, scale: scale)
+                guard points.count > 1 else { continue }
+
+                let path = smoothedPath(from: points)
                 ctx.addPath(path)
                 ctx.strokePath()
             }
         }
     }
 
-    static func curvedPathAvoidingWater(from start: CGPoint, to end: CGPoint, noiseMap: GKNoiseMap, size: CGSize) -> CGPath {
+    private static func smoothedPath(from points: [CGPoint]) -> CGPath {
         let path = CGMutablePath()
-        path.move(to: start)
-
-        let steps = 20
-        for i in 1..<steps {
-            let t = CGFloat(i) / CGFloat(steps)
-            let x = start.x + (end.x - start.x) * t + CGFloat.random(in: -5...5)
-            let y = start.y + (end.y - start.y) * t + CGFloat.random(in: -5...5)
-            let ix = Int(min(max(x, 0), size.width - 1))
-            let iy = Int(min(max(y, 0), size.height - 1))
-            if noiseMap.value(at: vector_int2(Int32(ix), Int32(iy))) > 0 {
-                path.addLine(to: CGPoint(x: x, y: y))
-            } else {
-                return CGMutablePath()
-            }
+        path.move(to: points[0])
+        for i in 1..<points.count - 1 {
+            let prev = points[i - 1]
+            let curr = points[i]
+            let next = points[i + 1]
+            let mid1 = CGPoint(x: (prev.x + curr.x) / 2, y: (prev.y + curr.y) / 2)
+            let mid2 = CGPoint(x: (curr.x + next.x) / 2, y: (curr.y + next.y) / 2)
+            path.addQuadCurve(to: mid2, control: curr)
         }
-
-        path.addLine(to: end)
+        path.addLine(to: points.last!)
         return path
     }
 }
