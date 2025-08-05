@@ -45,6 +45,10 @@ final class Config {
         var connectionChance: Int = 10
         var strokeColor: CGColor = UIColor.brown.cgColor
         var lineWidth: CGFloat = 1.0
+
+        var bridgeColor: CGColor = UIColor.red.cgColor
+        var bridgeLineWidth: CGFloat = 2.0
+        var bridgeDashPattern: [CGFloat] = [4, 2]
     }
 
     struct Pathfinding {

@@ -32,7 +32,7 @@ struct MapGenerator {
 
             let scale = Config.shared.rendering.scale
             let costMap = TerrainCostMap(noiseMap: noiseMap, width: width, height: height, scale: scale)
-            RoadGenerator.drawRoads(ctx: context, cities: cities, costMap: costMap, size: CGSize(width: width / scale, height: height / scale), scale: scale)
+            RoadGenerator.drawRoads(ctx: context, cities: cities, costMap: costMap, noiseMap: noiseMap, size: CGSize(width: width / scale, height: height / scale), scale: scale)
         }
     }
 }
