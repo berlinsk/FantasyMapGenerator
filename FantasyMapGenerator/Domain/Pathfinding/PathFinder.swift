@@ -23,7 +23,7 @@ struct PathFinder {
         var fScore: [vector_int2: Float] = [scaledStart: heuristic(scaledStart, scaledEnd)]
 
         while !openSet.isEmpty {
-            guard let current = openSet.min(by: { fScore[$0, default: .greatestFiniteMagnitude] < fScore[$1, default: .greatestFiniteMagnitude] }) else { break }
+            guard let current = openSet.min(by: { fScore[$0, default: Config.shared.pathfinding.unreachableCost] < fScore[$1, default: Config.shared.pathfinding.unreachableCost] }) else { break }
 
             if current == scaledEnd {
                 return reconstructPath(cameFrom: cameFrom, current: current, scale: scale)
@@ -42,9 +42,9 @@ struct PathFinder {
 
                     let baseCost = distance(current, neighbor)
                     let terrainCost = costMap.cost(at: neighbor)
-                    let tentativeGScore = gScore[current, default: .greatestFiniteMagnitude] + baseCost * terrainCost
+                    let tentativeGScore = gScore[current, default: Config.shared.pathfinding.unreachableCost] + baseCost * terrainCost
 
-                    if tentativeGScore < gScore[neighbor, default: .greatestFiniteMagnitude] {
+                    if tentativeGScore < gScore[neighbor, default: Config.shared.pathfinding.unreachableCost] {
                         cameFrom[neighbor] = current
                         gScore[neighbor] = tentativeGScore
                         fScore[neighbor] = tentativeGScore + heuristic(neighbor, scaledEnd)

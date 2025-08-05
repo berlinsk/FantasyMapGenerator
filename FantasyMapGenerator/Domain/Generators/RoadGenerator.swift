@@ -11,10 +11,10 @@ import GameplayKit
 
 struct RoadGenerator {
     static func drawRoads(ctx: CGContext, cities: [CGPoint], costMap: TerrainCostMap, size: CGSize, scale: Int) {
-        ctx.setStrokeColor(UIColor.brown.cgColor)
-        ctx.setLineWidth(1)
+        ctx.setStrokeColor(Config.shared.road.strokeColor)
+        ctx.setLineWidth(Config.shared.road.lineWidth)
         for i in 0..<cities.count {
-            for j in i+1..<cities.count where Int.random(in: 0...100) < 10 {
+            for j in i+1..<cities.count where Int.random(in: 0...100) < Config.shared.road.connectionChance {
                 let points = PathFinder.findPath(from: cities[i], to: cities[j], costMap: costMap, size: size, scale: scale)
                 guard points.count > 1 else { continue }
 

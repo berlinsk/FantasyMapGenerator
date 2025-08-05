@@ -12,7 +12,7 @@ struct RiverGenerator {
     static func drawRivers(in context: CGContext, with noiseMap: GKNoiseMap, width: Int, height: Int) {
         context.setStrokeColor(UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1).cgColor)
 
-        for _ in 0 ..< 5 {
+        for _ in 0 ..< Config.shared.river.riverCount {
             var p: CGPoint = .zero
             var attempts = 0
             repeat {
@@ -24,12 +24,12 @@ struct RiverGenerator {
                     break
                 }
                 attempts += 1
-            } while attempts < 100
+            } while attempts < Config.shared.river.maxAttemptsToPlaceSource
 
             var points: [CGPoint] = [p]
             var exitedToWater = false
 
-            let maxLength = Int.random(in: 200...750)
+            let maxLength = Int.random(in: Config.shared.river.riverLengthRange)
 
             for _ in 0..<maxLength {
                 let i = min(max(Int(p.x), 0), width - 1)
@@ -52,20 +52,20 @@ struct RiverGenerator {
                     }
                 }
 
-                p.x += CGFloat(steepestDir.dx) + CGFloat.random(in: -0.3...0.3)
-                p.y += CGFloat(steepestDir.dy) + CGFloat.random(in: -0.3...0.3)
+                p.x += CGFloat(steepestDir.dx) + CGFloat.random(in: Config.shared.river.jitterRange)
+                p.y += CGFloat(steepestDir.dy) + CGFloat.random(in: Config.shared.river.jitterRange)
                 if p.x < 0 || p.x >= CGFloat(width) || p.y < 0 || p.y >= CGFloat(height) { break }
 
                 let elevation = noiseMap.value(at: vector_int2(Int32(i), Int32(j)))
-                if elevation < -0.05 {
+                if elevation < Config.shared.river.deepWaterThreshold {
                     exitedToWater = true
 
-                    for k in 0..<6 {
+                    for k in 0..<Config.shared.river.deltaSearchSteps {
                         let px = Int(p.x) + Int(CGFloat(steepestDir.dx) * CGFloat(k))
                         let py = Int(p.y) + Int(CGFloat(steepestDir.dy) * CGFloat(k))
                         if px >= 0 && px < width && py >= 0 && py < height {
                             let val = noiseMap.value(at: vector_int2(Int32(px), Int32(py)))
-                            if val < -0.05 {
+                            if val < Config.shared.river.deepWaterThreshold {
                                 points.append(CGPoint(x: px, y: py))
                                 break
                             }
@@ -73,14 +73,14 @@ struct RiverGenerator {
                     }
 
                     break
-                } else if elevation < 0 {
+                } else if elevation < Config.shared.river.shallowWaterThreshold {
                     var foundWater = false
                     var searchP = p
-                    for _ in 0..<10 {
+                    for _ in 0..<Config.shared.river.maxForwardSearchSteps {
                         let i2 = min(max(Int(searchP.x), 0), width - 1)
                         let j2 = min(max(Int(searchP.y), 0), height - 1)
                         let elev = noiseMap.value(at: vector_int2(Int32(i2), Int32(j2)))
-                        if elev < -0.05 {
+                        if elev < Config.shared.river.deepWaterThreshold {
                             exitedToWater = true
                             p = searchP
                             points.append(p)
@@ -118,7 +118,7 @@ struct RiverGenerator {
                     let j = min(max(Int(lastPoint.y), 0), height - 1)
                     let finalElevation = Double(noiseMap.value(at: vector_int2(Int32(i), Int32(j))))
                     let waterColor = TerrainType.from(value: finalElevation).color
-                    let baseColor = UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1)
+                    let baseColor = Config.shared.river.baseColor
 
                     for i in 0..<points.count - 1 {
                         let p1 = points[i]
@@ -128,7 +128,7 @@ struct RiverGenerator {
                         let blendedColor = ColorUtils.interpolate(from: baseColor, to: waterColor, t: t)
                         context.setStrokeColor(blendedColor.cgColor)
 
-                        let thickness = 1.5 + 4.5 * t
+                        let thickness = Config.shared.river.minWidth + (Config.shared.river.maxWidth - Config.shared.river.minWidth) * t
                         context.setLineWidth(thickness)
                         context.beginPath()
                         context.move(to: p1)
@@ -136,7 +136,7 @@ struct RiverGenerator {
                         context.strokePath()
                     }
                 } else {
-                    context.setLineWidth(2)
+                    context.setLineWidth(Config.shared.river.fallbackLineWidth)
                     context.addPath(riverPath)
                     context.strokePath()
                 }

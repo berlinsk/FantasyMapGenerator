@@ -41,7 +41,7 @@ final class TerrainCostMap {
         guard point.x >= 0, point.y >= 0,
               point.y < costMap.count,
               point.x < costMap[0].count else {
-            return .greatestFiniteMagnitude
+            return Config.shared.pathfinding.unreachableCost
         }
         return costMap[Int(point.y)][Int(point.x)]
     }
@@ -49,19 +49,19 @@ final class TerrainCostMap {
     private static func cost(for elevation: Float) -> Float {
         switch elevation {
         case ..<0:
-            return 1000.0
+            return Config.shared.terrainCost.deepWater
         case 0..<0.2:
-            return 1.0
+            return Config.shared.terrainCost.shallowWater
         case 0.2..<0.4:
-            return 1.5
+            return Config.shared.terrainCost.grassLowland
         case 0.4..<0.6:
-            return 2.5
+            return Config.shared.terrainCost.grassland
         case 0.6..<0.8:
-            return 4.0
+            return Config.shared.terrainCost.foothills
         case 0.8...:
-            return 8.0
+            return Config.shared.terrainCost.mountains
         default:
-            return 1.0
+            return Config.shared.terrainCost.defaultCost
         }
     }
 }
