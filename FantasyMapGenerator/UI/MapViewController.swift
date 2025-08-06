@@ -43,6 +43,6 @@ class MapViewController: UIViewController {
     }
 
     @objc private func regenerateMap() {
-        imageView.image = MapGenerator.generate(size: CGSize(width: 512, height: 512))
+        imageView.image = MapGenerator.generate(size: CGSize(width: 512, height: 512), biomes: .single(.forest))
     }
 }

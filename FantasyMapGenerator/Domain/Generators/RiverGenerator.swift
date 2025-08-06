@@ -9,7 +9,7 @@ import CoreGraphics
 import GameplayKit
 
 struct RiverGenerator {
-    static func drawRivers(in context: CGContext, with noiseMap: GKNoiseMap, width: Int, height: Int) {
+    static func drawRivers(in context: CGContext, noiseMap: GKNoiseMap, tempMap: GKNoiseMap, moistMap: GKNoiseMap, width: Int, height: Int, selection: BiomeSelection) {
         context.setStrokeColor(UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1).cgColor)
 
         for _ in 0 ..< Config.shared.river.riverCount {
@@ -117,7 +117,10 @@ struct RiverGenerator {
                     let i = min(max(Int(lastPoint.x), 0), width - 1)
                     let j = min(max(Int(lastPoint.y), 0), height - 1)
                     let finalElevation = Double(noiseMap.value(at: vector_int2(Int32(i), Int32(j))))
-                    let waterColor = TerrainType.from(value: finalElevation).color
+                    let temp = Double(tempMap.value(at: vector_int2(Int32(i), Int32(j))))
+                    let moist = Double(moistMap.value(at: vector_int2(Int32(i), Int32(j))))
+                    let type = TerrainType.from(value: finalElevation, temperature: temp, moisture: moist, selection: selection)
+                    let waterColor = ConfigBiomeColor.current.biomeColorFor(type, selection: selection)
                     let baseColor = Config.shared.river.baseColor
 
                     for i in 0..<points.count - 1 {
